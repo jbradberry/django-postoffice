@@ -37,7 +37,7 @@ class Message(models.Model):
 
     timestamp = models.DateTimeField()
     subject = models.CharField(max_length=100)
-    parent = models.ForeignKey("Message", null=True)
+    parent = models.ForeignKey('self', null=True)
 
     body = models.TextField()
     body_html = models.TextField()
