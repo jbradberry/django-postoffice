@@ -2,26 +2,16 @@ from django.db import models
 from django.contrib.contenttypes import generic
 
 
-class Account(models.Model):
-    name = models.CharField(max_length=100)
-    closed = models.BooleanField(default=False)
-
-    content_type = models.ForeignKey("contenttypes.ContentType")
-    object_id = models.PositiveIntegerField()
+class Address(models.Model):
+    content_type = models.ForeignKey("contenttypes.ContentType", null=True)
+    object_id = models.PositiveIntegerField(null=True)
     context = generic.GenericForeignKey()
 
-    users = models.ManyToManyField("auth.User", through='AccountView')
-    messages = models.ManyToManyField("Message", through='AccountMessage')
-
-    def __unicode__(self):
-        return self.name
-
-
-class AccountView(models.Model):
-    account = models.ForeignKey(Account)
-    user = models.ForeignKey("auth.User")
-
     name = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+
+    users = models.ManyToManyField("auth.User",
+                                   related_name='postoffice_addresses')
 
     def __unicode__(self):
         return self.name
@@ -29,11 +19,9 @@ class AccountView(models.Model):
 
 class Message(models.Model):
     author = models.ForeignKey("auth.User")
-    from_name = models.CharField(max_length=100)
+    author_name = models.CharField(max_length=100)
 
-    sender = models.ForeignKey(Account, related_name='sent_messages')
-    to = models.ManyToManyField(Account, related_name='to_received')
-    bcc = models.ManyToManyField(Account, related_name='bcc_received')
+    addresses = models.ManyToManyField(Address, through='MessageAddress')
 
     timestamp = models.DateTimeField()
     subject = models.CharField(max_length=100)
@@ -42,11 +30,28 @@ class Message(models.Model):
     body = models.TextField()
     body_html = models.TextField()
 
+    recipients = models.ManyToManyField("auth.User", through='MessageUser',
+                                        related_name='postoffice_messages')
 
-class AccountMessage(models.Model):
-    account = models.ForeignKey(Account)
+
+class MessageAddress(models.Model):
+    TO = 'to'
+    CC = 'cc'
+    BCC = 'bcc'
+    ADDRESS_CHOICES = ((TO, 'To'),
+                       (CC, 'Cc'),
+                       (BCC, 'Bcc'),)
+
     message = models.ForeignKey(Message)
+    address = models.ForeignKey(Address)
+    address_type = models.CharField(max_length=3, choices=ADDRESS_CHOICES,
+                                    default=TO)
 
-    folder = models.CharField(max_length=50)
+
+class MessageUser(models.Model):
+    message = models.ForeignKey(Message)
+    user = models.ForeignKey("auth.User")
+
+    address = models.ForeignKey(Address)
     is_read = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
