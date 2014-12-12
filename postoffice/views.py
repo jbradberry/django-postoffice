@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import (ObjectDoesNotExist, PermissionDenied,
+                                    ImproperlyConfigured)
 from django.views.generic import ListView, DetailView, CreateView
 from django.http import Http404
 from django.conf import settings
