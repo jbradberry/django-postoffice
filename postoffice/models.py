@@ -58,6 +58,5 @@ class MessageUser(models.Model):
     message = models.ForeignKey(Message)
     user = models.ForeignKey("auth.User")
 
-    address = models.ForeignKey(Address)
     is_read = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
