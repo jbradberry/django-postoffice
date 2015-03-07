@@ -55,10 +55,11 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = models.Message
         fields = (
-            'author_name', 'addresses', 'timestamp', 'subject',
-            'parent', 'body', 'body_html'
+            'author_name', 'author_address', 'addresses', 'timestamp',
+            'subject', 'parent', 'body', 'body_html'
         )
-        read_only_fields = ('author_name', 'timestamp', 'parent', 'body_html')
+        read_only_fields = ('author_address', 'timestamp',
+                            'parent', 'body_html')
 
 
 class MessageUserSerializer(serializers.ModelSerializer):

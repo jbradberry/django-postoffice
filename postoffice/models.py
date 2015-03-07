@@ -22,6 +22,8 @@ class Address(models.Model):
 class Message(models.Model):
     author = models.ForeignKey("auth.User")
     author_name = models.CharField(max_length=100)
+    author_address = models.ForeignKey(Address, null=True,
+                                       related_name='sentmail')
 
     addresses = models.ManyToManyField(Address, through='MessageAddress')
 
