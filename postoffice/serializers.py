@@ -37,7 +37,8 @@ class AddressSerializer(serializers.ModelSerializer):
         model = models.Address
         fields = ('content_type', 'object_id', 'name', 'is_active',
                   'unread_count', 'inbox_count')
-        read_only_fields = ('unread_count', 'inbox_count')
+        read_only_fields = ('content_type', 'object_id', 'name', 'is_active',
+                            'unread_count', 'inbox_count')
 
     def get_unread_count(self, obj):
         user = self._context['request'].user
@@ -48,3 +49,22 @@ class AddressSerializer(serializers.ModelSerializer):
         user = self._context['request'].user
         return models.MessageUser.objects.filter(
             address=obj, user=user, is_archived=False).count()
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = models.Message
+        fields = (
+            'author_name', 'addresses', 'timestamp', 'subject',
+            'parent', 'body', 'body_html'
+        )
+        read_only_fields = ('author_name', 'timestamp', 'parent', 'body_html')
+
+
+class MessageUserSerializer(serializers.ModelSerializer):
+    message = MessageSerializer(read_only=True)
+
+    class Meta(object):
+        model = models.MessageUser
+        fields = ('message', 'user', 'is_read', 'is_archived')
+        read_only_fields = ('message', 'user')

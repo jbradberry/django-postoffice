@@ -10,7 +10,6 @@ from . import models, plugins, serializers
 from rest_framework import generics, mixins
 
 
-# /api/starsrace/3/messages/               (list and filter message, create new messages)
 # /api/starsrace/3/messages/7/             (read a particular message)
 # /api/starsrace/3/messages/7/read/        (mark message as read)
 # /api/starsrace/3/messages/7/unread/      (mark message as unread)
@@ -49,4 +48,35 @@ class AddressListView(AddressMixin, generics.ListAPIView):
 class AddressRetrieveView(AddressMixin, generics.RetrieveAPIView):
     # /api/starsrace/3/
     #permission_classes = (PluginPermissions,)
+    pass
+
+
+class MessageUserMixin(object):
+    serializer_class = serializers.MessageSerializer
+    queryset = models.MessageUser.objects.all()
+
+    def get_address(self):
+        alias = self.kwargs.get('agent_alias')
+        ct = plugins.agent_type(alias)
+        pk = self.kwargs.get('agent_pk')
+
+        address = get_object_or_404(
+            models.Address, content_type=ct, object_id=pk)
+
+        if not address.users.filter(id=self.request.user.pk).exists():
+            raise PermissionDenied
+
+        return address
+
+    def get_queryset(self):
+        address = self.get_address()
+
+        return self.queryset.filter(
+            user=self.request.user,
+            message__addresses=address
+        )
+
+
+class MessageListView(MessageUserMixin, generics.ListAPIView):
+    # /api/starsrace/3/messages/
     pass

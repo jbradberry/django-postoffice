@@ -9,4 +9,7 @@ urlpatterns = patterns('',
     url(r'^(?P<agent_alias>[-\w]+)/(?P<agent_pk>\d+)/$',
         views.AddressRetrieveView.as_view(),
         name='address_detail'),
+    url(r'^(?P<agent_alias>[-\w]+)/(?P<agent_pk>\d+)/messages/$',
+        views.MessageListView.as_view(),
+        name='message_list'),
 )
