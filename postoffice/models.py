@@ -5,7 +5,7 @@ from django.contrib.contenttypes import generic
 class Address(models.Model):
     content_type = models.ForeignKey("contenttypes.ContentType", null=True)
     object_id = models.PositiveIntegerField(null=True)
-    context = generic.GenericForeignKey()
+    context = generic.GenericForeignKey() # TODO: rename to agent
 
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
@@ -46,7 +46,7 @@ class MessageAddress(models.Model):
                        (CC, 'Cc'),
                        (BCC, 'Bcc'),)
 
-    message = models.ForeignKey(Message)
+    message = models.ForeignKey(Message, related_name='header_addresses')
     address = models.ForeignKey(Address)
     address_type = models.CharField(max_length=3, choices=ADDRESS_CHOICES,
                                     default=TO)

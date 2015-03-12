@@ -25,6 +25,7 @@ class ReadOnlyDefault(object):
         return '%s()' % (self.__class__.__name__,)
 
 
+# TODO: rename to InboxSerializer
 class AddressSerializer(serializers.ModelSerializer):
     content_type = ContentTypeField(read_only=True, default=ReadOnlyDefault())
     object_id = serializers.IntegerField(read_only=True,
@@ -51,15 +52,34 @@ class AddressSerializer(serializers.ModelSerializer):
             address=obj, user=user, is_archived=False).count()
 
 
+# TODO: create an AddressSerializer for use with RecipientSerializer?
+
+class RecipientSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = models.MessageAddress
+        fields = ('address', 'address_type')
+
+
 class MessageSerializer(serializers.ModelSerializer):
+    header_addresses = RecipientSerializer(many=True)
+
     class Meta(object):
         model = models.Message
         fields = (
-            'author_name', 'author_address', 'addresses', 'timestamp',
+            'author_name', 'author_address', 'header_addresses', 'timestamp',
             'subject', 'parent', 'body', 'body_html'
         )
         read_only_fields = ('author_address', 'timestamp',
                             'parent', 'body_html')
+
+    def create(self, validated_data):
+        address_data = validated_data.pop('header_addresses', ())
+        message = models.Message.objects.create(**validated_data)
+        models.MessageAddress.objects.bulk_create([
+            models.MessageAddress(message=message, **m_address)
+            for m_address in address_data
+        ])
+        return message
 
 
 class MessageUserSerializer(serializers.ModelSerializer):
