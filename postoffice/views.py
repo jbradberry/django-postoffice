@@ -7,7 +7,8 @@ from django.conf import settings
 
 from . import models, plugins, serializers
 
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, status
+from rest_framework.response import Response
 
 
 # TODO: create an endpoint that provides a list of valid target
@@ -74,6 +75,29 @@ class AddressMixin(object):
 
         return address
 
+
+class MessageCreateView(AddressMixin, generics.CreateAPIView):
+    # /api/starsrace/42/post/
+    serializer_class = serializers.MessageSerializer
+    queryset = models.Message.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        address = self.get_address()
+
+        instance = models.Message(author=self.request.user,
+                                  author_address=address)
+        serializer = self.get_serializer(instance=instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class MessageListView(AddressMixin, generics.ListAPIView):
+    # /api/starsrace/42/messages/
+    serializer_class = serializers.MessageUserSerializer
+    queryset = models.MessageUser.objects.all()
+
     def get_queryset(self):
         address = self.get_address()
 
@@ -81,8 +105,3 @@ class AddressMixin(object):
             user=self.request.user,
             message__addresses=address
         )
-
-
-class MessageListView(MessageUserMixin, generics.ListAPIView):
-    # /api/starsrace/3/messages/
-    pass
