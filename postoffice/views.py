@@ -10,16 +10,25 @@ from . import models, plugins, serializers
 from rest_framework import generics, mixins
 
 
-# /api/starsrace/3/messages/7/             (read a particular message)
-# /api/starsrace/3/messages/7/read/        (mark message as read)
-# /api/starsrace/3/messages/7/unread/      (mark message as unread)
-# /api/starsrace/3/messages/7/archive/     (mark message as archived)
-# /api/starsrace/3/messages/7/unarchive/   (mark message as unarchived)
+# TODO: create an endpoint that provides a list of valid target
+# addresses for a particular agent to mail to (/api/starsrace/42/addresses/)
+
+# TODO: add a method to the plugin that provides the list of target
+# agents for a given agent
+
+# TODO: create an endpoint for a realm administrator to create addresses?
+
+
+# /api/starsrace/42/messages/7/             (read a particular message)
+# /api/starsrace/42/messages/7/read/        (mark message as read)
+# /api/starsrace/42/messages/7/unread/      (mark message as unread)
+# /api/starsrace/42/messages/7/archive/     (mark message as archived)
+# /api/starsrace/42/messages/7/unarchive/   (mark message as unarchived)
 
 
 # TODO: replace views with Django REST Framework
 
-class AddressMixin(object):
+class AddressQuerysetMixin(object):
     serializer_class = serializers.AddressSerializer
     queryset = models.Address.objects.all()
 
@@ -39,22 +48,19 @@ class AddressMixin(object):
         return obj
 
 
-class AddressListView(AddressMixin, generics.ListAPIView):
+class AddressListView(AddressQuerysetMixin, generics.ListAPIView):
     # /api/starsrace/
     #permission_classes = (PluginPermissions,)
     pass
 
 
-class AddressRetrieveView(AddressMixin, generics.RetrieveAPIView):
-    # /api/starsrace/3/
+class AddressRetrieveView(AddressQuerysetMixin, generics.RetrieveAPIView):
+    # /api/starsrace/42/
     #permission_classes = (PluginPermissions,)
     pass
 
 
-class MessageUserMixin(object):
-    serializer_class = serializers.MessageSerializer
-    queryset = models.MessageUser.objects.all()
-
+class AddressMixin(object):
     def get_address(self):
         alias = self.kwargs.get('agent_alias')
         ct = plugins.agent_type(alias)
