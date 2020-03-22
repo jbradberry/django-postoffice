@@ -1,0 +1,9 @@
+*~
+*.pyc
+.tox
+*.egg-info
+MANIFEST
+TODO
+*.db3
+*.sqlite3
+*.bak
