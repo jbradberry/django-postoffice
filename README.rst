@@ -11,7 +11,7 @@ Django apps.
 
 Requirements
 ------------
-- Python >= 2.6
+- Python >= 2.7
 - Django >= 1.5
 - django-template-utils_
 - lxml
