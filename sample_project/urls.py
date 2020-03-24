@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, include, url
 
-urlpatterns = patterns('',
+
+urlpatterns = patterns(
+    '',
     url(r'^', include('postoffice.urls')),
-    (r'^accounts/login/$', 'django.contrib.auth.views.login'),
+    url(r'^accounts/', include('django.contrib.auth.urls')),
 )
